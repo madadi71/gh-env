@@ -11,7 +11,7 @@ jobs:
     env:
       MONGODB_CLUSTER_ADDRESS: cluster0.rughxen.mongodb.net
       MONGODB_USERNAME: mohammadrezamadadi36_db_user
-      MONGODB_PASSWORD: felU7tYNydj5GDtO
+      MONGODB_PASSWORD: TAVywIO55HsWZPq5
       PORT: 8080
     runs-on: ubuntu-latest
     steps:
