@@ -34,12 +34,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Verify required configuration
+      - name: Verify MongoDB configuration
         run: |
-          test -n "$MONGODB_CLUSTER_ADDRESS" && echo "Cluster address configured."
-          test -n "$MONGODB_USERNAME" && echo "MongoDB username configured."
-          test -n "$MONGODB_PASSWORD" && echo "MongoDB password configured."
-          test -n "$MONGODB_DB_NAME" && echo "Database name configured."
+          test -n "$MONGODB_CLUSTER_ADDRESS" && echo "Cluster address exists."
+          test -n "$MONGODB_USERNAME" && echo "Username exists."
+          test -n "$MONGODB_PASSWORD" && echo "Password exists."
+          test -n "$MONGODB_DB_NAME" && echo "Database name exists."
 
       - name: Run server and wait for readiness
         run: |
@@ -58,5 +58,5 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Output information
-        run: echo "Tests passed; deploy stage may begin."
+      - name: Deploy placeholder
+        run: echo "Tests passed; deployment can begin."
