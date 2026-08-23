@@ -1,42 +1,62 @@
 name: Deployment
+
 on:
   push:
     branches:
       - main
       - master
       - dev
+  workflow_dispatch:
+
 env:
   MONGODB_DB_NAME: gha-demo
+
 jobs:
   test:
-    env:
-      MONGODB_CLUSTER_ADDRESS: cluster0.rughxen.mongodb.net
-      MONGODB_USERNAME: mohammadrezamadadi36_db_user
-      MONGODB_PASSWORD: TAVywIO55HsWZPq5
-      PORT: 8080
     runs-on: ubuntu-latest
+
+    env:
+      MONGODB_CLUSTER_ADDRESS: ${{ secrets.MONGODB_CLUSTER_ADDRESS }}
+      MONGODB_USERNAME: ${{ secrets.MONGODB_USERNAME }}
+      MONGODB_PASSWORD: ${{ secrets.MONGODB_PASSWORD }}
+      PORT: 8080
+
     steps:
-      - name: Get Code
-        uses: actions/checkout@v3
+      - name: Get code
+        uses: actions/checkout@v4
+
       - name: Cache dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ~/.npm
           key: npm-deps-${{ hashFiles('**/package-lock.json') }}
+
       - name: Install dependencies
         run: npm ci
-      - name: Run server
-        run: npm start & npx wait-on http://127.0.0.1:$PORT
+
+      - name: Verify required configuration
+        run: |
+          test -n "$MONGODB_CLUSTER_ADDRESS" && echo "Cluster address configured."
+          test -n "$MONGODB_USERNAME" && echo "MongoDB username configured."
+          test -n "$MONGODB_PASSWORD" && echo "MongoDB password configured."
+          test -n "$MONGODB_DB_NAME" && echo "Database name configured."
+
+      - name: Run server and wait for readiness
+        run: |
+          npm start > server.log 2>&1 &
+          npx wait-on --timeout 30000 "http://127.0.0.1:$PORT" || {
+            echo "Server did not become ready. Server logs:"
+            cat server.log
+            exit 1
+          }
+
       - name: Run tests
         run: npm test
-      - name: Output information
-        run: |
-          echo "MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}"
+
   deploy:
     needs: test
     runs-on: ubuntu-latest
+
     steps:
       - name: Output information
-        run: |
-          echo 'MONGODB_USERNAME: ${{ env.MONGODB_USERNAME }}'
-          echo 'MONGODB_DB_NAME: ${{ env.MONGODB_DB_NAME }}'
+        run: echo "Tests passed; deploy stage may begin."
